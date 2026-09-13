@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Tienda</title>
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --card: #fff;
+    --text: #1a1a1a;
+    --muted: #6b7280;
+    --line: #e5e7eb;
+    --accent: #0f766e;
+    --accent-dark: #115e59;
+    --danger: #b91c1c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+    padding: 12px 16px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .logo { font-weight: 800; font-size: 20px; }
+  .search {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    font-size: 15px;
+  }
+  .cart-btn {
+    border: 0;
+    background: #111827;
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 15px;
+  }
+  .cart-btn span {
+    background: #ef4444;
+    border-radius: 999px;
+    padding: 2px 7px;
+    font-size: 12px;
+    margin-left: 4px;
+  }
+  .categories {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 12px 16px;
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+  }
+  .category-btn {
+    white-space: nowrap;
+    border: 1px solid var(--line);
+    background: #fff;
+    padding: 8px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .category-btn.active {
+    background: #111827;
+    color: #fff;
+    border-color: #111827;
+  }
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 16px 60px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+  }
+  .card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 4px 14px rgba(0,0,0,.05);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* 商品图片区域 */
+  .product-media {
+    width: 100%;
+    height: 180px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .product-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .product-media .emoji {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 56px;
+    line-height: 1;
+  }
+
+  .card h3 { margin: 0; font-size: 17px; }
+  .desc { margin: 0; color: var(--muted); font-size: 14px; flex: 1; }
+  .price { font-weight: 800; color: var(--accent); font-size: 18px; }
+  .add {
+    border: 0;
+    background: var(--accent);
+    color: #fff;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 15px;
+  }
+  .add:hover { background: var(--accent-dark); }
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.4);
+    z-index: 15;
+    display: none;
+  }
+  .overlay.show { display: block; }
+  .cart-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: min(400px, 100%);
+    height: 100%;
+    background: #fff;
+    box-shadow: -10px 0 30px rgba(0,0,0,.15);
+    transform: translateX(100%);
+    transition: transform .25s ease;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+  }
+  .cart-drawer.open { transform: translateX(0); }
+  .cart-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .cart-header button {
+    border: 0;
+    background: transparent;
+    font-size: 24px;
+    cursor: pointer;
+  }
+  .cart-items { flex: 1; overflow: auto; padding: 16px; }
+  .cart-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    border-bottom: 1px solid var(--line);
+    padding: 10px 0;
+    font-size: 14px;
+  }
+  .cart-left {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    min-width: 0;
+  }
+  .cart-thumb-wrap {
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
+    border-radius: 8px;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .cart-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .cart-emoji { font-size: 24px; }
+  .cart-info { min-width: 0; }
+  .cart-item button {
+    border: 1px solid var(--line);
+    background: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-left: 4px;
+    padding: 2px 7px;
+  }
+  .cart-footer {
+    padding: 16px;
+    border-top: 1px solid var(--line);
+    display: grid;
+    gap: 10px;
+  }
+  .checkout {
+    border: 0;
+    background: #111827;
+    color: #fff;
+    padding: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  .clear {
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--danger);
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  /* ===== 登录界面 ===== */
+  .auth-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: linear-gradient(135deg, #0f766e, #115e59 60%, #0b3b38);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .auth-screen.hidden { display: none; }
+  .auth-card {
+    width: 100%;
+    max-width: 430px;
+    background: #fff;
+    border-radius: 20px;
+    padding: 30px 26px 26px;
+    box-shadow: 0 24px 60px rgba(0,0,0,.3);
+  }
+  .auth-brand {
+    font-size: 24px;
+    font-weight: 800;
+    text-align: center;
+  }
+  .auth-sub {
+    margin: 8px 0 22px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .auth-card label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin: 14px 0 6px;
+    color: #374151;
+  }
+  .auth-card input[type="email"],
+  .auth-card input[type="password"] {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    font-size: 15px;
+  }
+  .auth-card input:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+    border-color: var(--accent);
+  }
+  .auth-btn {
+    width: 100%;
+    margin-top: 20px;
+    border: 0;
+    background: var(--accent);
+    color: #fff;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .auth-btn:hover { background: var(--accent-dark); }
+  .form-msg {
+    margin-top: 12px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    display: none;
+    padding: 9px 11px;
+    border-radius: 9px;
+  }
+  .form-msg.error {
+    display: block;
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+  }
+  .form-msg.ok {
+    display: block;
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+  }
+  .auth-hint {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--line);
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.6;
+    text-align: center;
+  }
+
+  /* ===== 用户栏 ===== */
+  .user-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-left: auto;
+  }
+  .user-email {
+    font-size: 13px;
+    color: var(--muted);
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .user-bar button {
+    border: 1px solid var(--line);
+    background: #fff;
+    border-radius: 9px;
+    padding: 8px 11px;
+    font-size: 13px;
+    cursor: pointer;
+    color: #374151;
+  }
+  .user-bar button:hover { background: #f9fafb; }
+  .user-bar .logout { color: var(--danger); border-color: #fecaca; }
+
+  /* ===== 修改密码弹窗 ===== */
+  .modal {
+    position: fixed;
+    inset: 0;
+    z-index: 120;
+    background: rgba(17,24,39,.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal.show { display: flex; }
+  .modal-card {
+    width: 100%;
+    max-width: 420px;
+    background: #fff;
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: 0 24px 60px rgba(0,0,0,.3);
+  }
+  .modal-card h2 {
+    margin: 0 0 4px;
+    font-size: 19px;
+  }
+  .modal-card .modal-sub {
+    margin: 0 0 16px;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .modal-card label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin: 12px 0 6px;
+    color: #374151;
+  }
+  .modal-card input {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    font-size: 15px;
+  }
+  .modal-card input:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+    border-color: var(--accent);
+  }
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  .modal-actions button {
+    flex: 1;
+    padding: 11px;
+    border-radius: 10px;
+    font-size: 15px;
+    cursor: pointer;
+  }
+  .btn-primary {
+    border: 0;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 600;
+  }
+  .btn-primary:hover { background: var(--accent-dark); }
+  .btn-secondary {
+    border: 1px solid var(--line);
+    background: #fff;
+    color: #374151;
+  }
+
+  #app.hidden { display: none; }
+</style>
+</head>
+<body>
+
+<!-- ================= 登录界面 ================= -->
+<div id="loginScreen" class="auth-screen">
+  <div class="auth-card">
+    <div class="auth-brand">Mi Tienda</div>
+    <p class="auth-sub">
+      Acceso exclusivo para la comunidad del<br>
+      <strong>Colegio Bautista</strong>
+    </p>
+
+    <form id="loginForm" novalidate>
+      <label for="loginEmail">Correo institucional</label>
+      <input id="loginEmail" type="email" autocomplete="username"
+             placeholder="nombre@alu.colegiobautista.cl">
+
+      <label for="loginPassword">Contraseña</label>
+      <input id="loginPassword" type="password" autocomplete="current-password"
+             placeholder="Tu contraseña">
+
+      <div id="loginMsg" class="form-msg"></div>
+
+      <button class="auth-btn" type="submit">Iniciar sesión</button>
+    </form>
+
+    <div class="auth-hint">
+      Solo se permite correo <strong>@alu.colegiobautista.cl</strong><br>
+      o <strong>@colegiobautista.cl</strong>.<br><br>
+      Contraseña inicial: <strong>Cbt2026#</strong><br>
+      Puedes cambiarla después de entrar.
+    </div>
+  </div>
+</div>
+
+<!-- ================= 商店 ================= -->
+<div id="app" class="hidden">
+
+  <header>
+    <div class="logo">Mi Tienda</div>
+    <input id="search" class="search" type="search" placeholder="Buscar productos...">
+    <button id="cartBtn" class="cart-btn">🛒 Carrito <span id="cartCount">0</span></button>
+
+    <div class="user-bar">
+      <span id="userEmail" class="user-email"></span>
+      <button id="changePwdBtn" type="button">Cambiar contraseña</button>
+      <button id="logoutBtn" type="button" class="logout">Salir</button>
+    </div>
+  </header>
+
+  <nav id="categories" class="categories"></nav>
+
+  <main>
+    <div id="grid" class="grid"></div>
+  </main>
+
+  <div id="overlay" class="overlay" onclick="closeCart()"></div>
+
+  <aside id="cartDrawer" class="cart-drawer">
+    <div class="cart-header">
+      <strong>Tu carrito</strong>
+      <button onclick="closeCart()">×</button>
+    </div>
+    <div id="cartItems" class="cart-items"></div>
+    <div class="cart-footer">
+      <div>Total: <strong id="cartTotal">$0</strong></div>
+      <button class="checkout" onclick="checkout()">Pagar (demo)</button>
+      <button class="clear" onclick="clearCart()">Vaciar</button>
+    </div>
+  </aside>
+
+</div>
+
+<!-- ================= 修改密码弹窗 ================= -->
+<div id="pwdModal" class="modal">
+  <div class="modal-card">
+    <h2>Cambiar contraseña</h2>
+    <p class="modal-sub">
+      Al guardar, se abrirá tu aplicación de correo con un aviso para
+      <strong>gl1697741361@gmail.com</strong>. Debes enviarlo para confirmar el cambio.
+    </p>
+
+    <form id="pwdForm" novalidate>
+      <label for="pwdCurrent">Contraseña actual</label>
+      <input id="pwdCurrent" type="password" autocomplete="current-password">
+
+      <label for="pwdNew">Nueva contraseña</label>
+      <input id="pwdNew" type="password" autocomplete="new-password"
+             placeholder="Mínimo 8 caracteres">
+
+      <label for="pwdConfirm">Confirmar nueva contraseña</label>
+      <input id="pwdConfirm" type="password" autocomplete="new-password">
+
+      <div id="pwdMsg" class="form-msg"></div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" onclick="closePwdModal()">Cancelar</button>
+        <button type="submit" class="btn-primary">Guardar y notificar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   配置区：要改就改这里
+   ========================================================= */
+const ALLOWED_DOMAINS = [
+  'alu.colegiobautista.cl',
+  'colegiobautista.cl'
+];
+const INITIAL_PASSWORD = 'Cbt2026#';
+const ADMIN_EMAIL = 'gl1697741361@gmail.com';
+
+const AUTH_USER_KEY = 'cbt_auth_user';
+const AUTH_PWD_KEY = 'cbt_passwords';
+
+/* =========================================================
+   登录逻辑
+   ========================================================= */
+function isValidEmail(email) {
+  const e = (email || '').trim().toLowerCase();
+  const at = e.lastIndexOf('@');
+  if (at < 1) return false;
+  const local = e.slice(0, at);
+  const domain = e.slice(at + 1);
+  if (!local || !domain) return false;
+  return ALLOWED_DOMAINS.includes(domain);
+}
+
+function getPasswords() {
+  try {
+    const obj = JSON.parse(localStorage.getItem(AUTH_PWD_KEY) || '{}');
+    return (obj && typeof obj === 'object') ? obj : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function savePasswords(obj) {
+  localStorage.setItem(AUTH_PWD_KEY, JSON.stringify(obj));
+}
+
+function getPasswordFor(email) {
+  const map = getPasswords();
+  return map[email] || INITIAL_PASSWORD;
+}
+
+function setPasswordFor(email, password) {
+  const map = getPasswords();
+  map[email] = password;
+  savePasswords(map);
+}
+
+function showLoginMsg(text, type) {
+  const el = document.getElementById('loginMsg');
+  el.textContent = text;
+  el.className = 'form-msg ' + (type || 'error');
+}
+
+function clearLoginMsg() {
+  const el = document.getElementById('loginMsg');
+  el.textContent = '';
+  el.className = 'form-msg';
+}
+
+function enterStore(email) {
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  document.getElementById('userEmail').textContent = email;
+}
+
+function showLogin() {
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginPassword').value = '';
+  clearLoginMsg();
+  setTimeout(() => {
+    document.getElementById('loginEmail').focus();
+  }, 50);
+}
+
+document.getElementById('loginForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  clearLoginMsg();
+
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const pwd = document.getElementById('loginPassword').value;
+
+  if (!email) {
+    showLoginMsg('Escribe tu correo institucional.');
+    return;
+  }
+
+  if (!isValidEmail(email)) {
+    showLoginMsg('Solo se permite correo @alu.colegiobautista.cl o @colegiobautista.cl');
+    return;
+  }
+
+  if (!pwd) {
+    showLoginMsg('Escribe tu contraseña.');
+    return;
+  }
+
+  if (pwd !== getPasswordFor(email)) {
+    showLoginMsg('Contraseña incorrecta. Si es tu primera vez, usa Cbt2026#');
+    return;
+  }
+
+  localStorage.setItem(AUTH_USER_KEY, email);
+  enterStore(email);
+});
+
+document.getElementById('logoutBtn').addEventListener('click', function () {
+  localStorage.removeItem(AUTH_USER_KEY);
+  closeCart();
+  closePwdModal();
+  showLogin();
+});
+
+/* =========================================================
+   修改密码
+   ========================================================= */
+function openPwdModal() {
+  document.getElementById('pwdForm').reset();
+  const msg = document.getElementById('pwdMsg');
+  msg.textContent = '';
+  msg.className = 'form-msg';
+  document.getElementById('pwdModal').classList.add('show');
+  setTimeout(() => document.getElementById('pwdCurrent').focus(), 50);
+}
+
+function closePwdModal() {
+  document.getElementById('pwdModal').classList.remove('show');
+}
+
+function showPwdMsg(text, type) {
+  const el = document.getElementById('pwdMsg');
+  el.textContent = text;
+  el.className = 'form-msg ' + (type || 'error');
+}
+
+function sendChangeNotification(email, timeStr) {
+  const subject = 'Cambio de contraseña - Tienda Colegio Bautista';
+  const lines = [
+    'Se solicitó un cambio de contraseña en la tienda.',
+    '',
+    'Correo del usuario: ' + email,
+    'Fecha y hora: ' + timeStr,
+    '',
+    'Si no reconoces esta acción, ignora este mensaje.'
+  ];
+  const url = 'mailto:' + ADMIN_EMAIL +
+              '?subject=' + encodeURIComponent(subject) +
+              '&body=' + encodeURIComponent(lines.join('\n'));
+  window.location.href = url;
+}
+
+document.getElementById('pwdForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+
+  const email = (localStorage.getItem(AUTH_USER_KEY) || '').toLowerCase();
+  if (!isValidEmail(email)) {
+    showPwdMsg('Tu sesión expiró. Vuelve a iniciar sesión.');
+    return;
+  }
+
+  const current = document.getElementById('pwdCurrent').value;
+  const next = document.getElementById('pwdNew').value;
+  const confirm = document.getElementById('pwdConfirm').value;
+
+  if (!current || !next || !confirm) {
+    showPwdMsg('Completa todos los campos.');
+    return;
+  }
+
+  if (current !== getPasswordFor(email)) {
+    showPwdMsg('La contraseña actual no es correcta.');
+    return;
+  }
+
+  if (next.length < 8) {
+    showPwdMsg('La nueva contraseña debe tener al menos 8 caracteres.');
+    return;
+  }
+
+  if (next === current) {
+    showPwdMsg('La nueva contraseña debe ser diferente a la actual.');
+    return;
+  }
+
+  if (next !== confirm) {
+    showPwdMsg('Las dos contraseñas nuevas no coinciden.');
+    return;
+  }
+
+  setPasswordFor(email, next);
+
+  const now = new Date().toLocaleString('es-CL');
+  sendChangeNotification(email, now);
+
+  showPwdMsg('Contraseña actualizada. Se abrió tu correo para enviar el aviso a ' + ADMIN_EMAIL + '. Si no se abrió, escríbele manualmente.', 'ok');
+
+  setTimeout(closePwdModal, 2600);
+});
+
+document.getElementById('changePwdBtn').addEventListener('click', openPwdModal);
+
+/* =========================================================
+   商店逻辑（分类 / 商品 / 购物车）
+   ========================================================= */
+const categories = [
+  { id: 'all', name: 'Todos' },
+  { id: 'cafe', name: 'Café' },
+  { id: 'te', name: 'Té' },
+  { id: 'jugos', name: 'Jugos' },
+  { id: 'snacks', name: 'Snacks' },
+  { id: 'aseo', name: 'Aseo' },
+  { id: 'ofertas', name: 'Ofertas' }
+];
+
+// 图片默认找 img/商品id.jpg。要指定图片就加 image: 'img/xxx.jpg'
+const products = [
+  { id: 1, name: 'Té con leche 1 botella', category: 'cafe', price: 1500, emoji: '☕', desc: 'Tostado medio, origen Colombia.' },
+  { id: 2, name: 'Té con leche 1 caja/12 botella', category: 'cafe', price: 15000, emoji: '☕', desc: 'Ideal para cafetera de filtro.' },
+  { id: 3, name: 'Té verde 1 botella', category: 'te', price: 1500, emoji: '🍵', desc: 'Té verde natural.' },
+  { id: 4, name: 'Té verde 1 caja/12 botella', category: 'te', price: 15000, emoji: '🍵', desc: 'Té negro clásico.' },
+  { id: 5, name: 'Jugo natural 500mL', category: 'jugos', price: 2000, emoji: '🧃', desc: 'Jugo de naranja sin azúcar añadida.' },
+  { id: 6, name: 'Jugo de manzana 1 L', category: 'jugos', price: 2000, emoji: '🧃', desc: 'Jugo de manzana natural.' },
+  { id: 7, name: 'Galletas de avena', category: 'snacks', price: 1890, emoji: '🍪', desc: 'Galletas de avena artesanales.' },
+  { id: 8, name: 'Mix frutos secos 200 g', category: 'snacks', price: 4590, emoji: '🥜', desc: 'Almendras, nueces y pasas.' },
+  { id: 9, name: 'Detergente 3 L', category: 'aseo', price: 6990, emoji: '🧴', desc: 'Detergente líquido para ropa.' },
+  { id: 10, name: 'Papel higiénico 12 rollos', category: 'aseo', price: 8990, emoji: '🧻', desc: 'Papel higiénico doble hoja.' },
+  { id: 11, name: 'Pack café + tazas', category: 'ofertas', price: 15990, emoji: '🎁', desc: 'Café 1 kg + 2 tazas.' },
+  { id: 12, name: 'Oferta snacks surtidos', category: 'ofertas', price: 9990, emoji: '🎁', desc: 'Selección de snacks.' }
+];
+
+const fmt = new Intl.NumberFormat('es-CL', {
+  style: 'currency',
+  currency: 'CLP',
+  maximumFractionDigits: 0
+});
+
+const state = {
+  category: 'all',
+  search: '',
+  cart: []
+};
+
+function loadCart() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('cart') || '[]');
+    if (Array.isArray(saved)) state.cart = saved;
+  } catch (e) {
+    state.cart = [];
+  }
+}
+
+function saveCart() {
+  localStorage.setItem('cart', JSON.stringify(state.cart));
+}
+
+function renderCategories() {
+  const nav = document.getElementById('categories');
+  nav.innerHTML = '';
+  categories.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'category-btn' + (state.category === cat.id ? ' active' : '');
+    btn.textContent = cat.name;
+    btn.addEventListener('click', () => {
+      state.category = cat.id;
+      renderCategories();
+      renderProducts();
+    });
+    nav.appendChild(btn);
+  });
+}
+
+function renderProducts() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  const q = state.search.trim().toLowerCase();
+
+  const list = products.filter(p => {
+    const matchCategory = state.category === 'all' || p.category === state.category;
+    const matchSearch = !q || p.name.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q);
+    return matchCategory && matchSearch;
+  });
+
+  if (list.length === 0) {
+    const empty = document.createElement('p');
+    empty.textContent = 'No se encontraron productos.';
+    grid.appendChild(empty);
+    return;
+  }
+
+  list.forEach(p => {
+    const card = document.createElement('article');
+    card.className = 'card';
+
+    const media = document.createElement('div');
+    media.className = 'product-media';
+
+    const image = document.createElement('img');
+    image.className = 'product-img';
+    image.src = p.image || ('img/' + p.id + '.jpg');
+    image.alt = p.name;
+    image.loading = 'lazy';
+
+    image.onerror = () => {
+      media.innerHTML = '';
+      const fallback = document.createElement('div');
+      fallback.className = 'emoji';
+      fallback.textContent = p.emoji || '🛍️';
+      media.appendChild(fallback);
+    };
+
+    media.appendChild(image);
+
+    const title = document.createElement('h3');
+    title.textContent = p.name;
+
+    const desc = document.createElement('p');
+    desc.className = 'desc';
+    desc.textContent = p.desc;
+
+    const price = document.createElement('div');
+    price.className = 'price';
+    price.textContent = fmt.format(p.price);
+
+    const btn = document.createElement('button');
+    btn.className = 'add';
+    btn.textContent = 'Agregar';
+    btn.addEventListener('click', () => addToCart(p.id));
+
+    card.append(media, title, desc, price, btn);
+    grid.appendChild(card);
+  });
+}
+
+function addToCart(id) {
+  const product = products.find(p => p.id === id);
+  if (!product) return;
+
+  const item = state.cart.find(i => i.id === id);
+  if (item) {
+    item.qty += 1;
+  } else {
+    state.cart.push({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      emoji: product.emoji,
+      image: product.image || ('img/' + product.id + '.jpg'),
+      qty: 1
+    });
+  }
+
+  saveCart();
+  renderCart();
+  openCart();
+}
+
+function changeQty(id, delta) {
+  const item = state.cart.find(i => i.id === id);
+  if (!item) return;
+
+  item.qty += delta;
+  if (item.qty <= 0) {
+    state.cart = state.cart.filter(i => i.id !== id);
+  }
+
+  saveCart();
+  renderCart();
+}
+
+function removeItem(id) {
+  state.cart = state.cart.filter(i => i.id !== id);
+  saveCart();
+  renderCart();
+}
+
+function clearCart() {
+  state.cart = [];
+  saveCart();
+  renderCart();
+}
+
+function renderCart() {
+  const list = document.getElementById('cartItems');
+  list.innerHTML = '';
+  let total = 0;
+  let count = 0;
+
+  state.cart.forEach(item => {
+    total += item.price * item.qty;
+    count += item.qty;
+
+    const row = document.createElement('div');
+    row.className = 'cart-item';
+
+    const left = document.createElement('div');
+    left.className = 'cart-left';
+
+    const thumbWrap = document.createElement('div');
+    thumbWrap.className = 'cart-thumb-wrap';
+
+    const thumbImg = document.createElement('img');
+    thumbImg.className = 'cart-thumb';
+    thumbImg.src = item.image || ('img/' + item.id + '.jpg');
+    thumbImg.alt = item.name;
+    thumbImg.loading = 'lazy';
+
+    thumbImg.onerror = () => {
+      thumbWrap.innerHTML = '';
+      const em = document.createElement('span');
+      em.className = 'cart-emoji';
+      em.textContent = item.emoji || '🛍️';
+      thumbWrap.appendChild(em);
+    };
+
+    thumbWrap.appendChild(thumbImg);
+
+    const info = document.createElement('div');
+    info.className = 'cart-info';
+    info.innerHTML = '<strong>' + item.name + '</strong><br><small>' +
+                     fmt.format(item.price) + ' × ' + item.qty + '</small>';
+
+    left.append(thumbWrap, info);
+
+    const controls = document.createElement('div');
+
+    const minus = document.createElement('button');
+    minus.textContent = '−';
+    minus.addEventListener('click', () => changeQty(item.id, -1));
+
+    const plus = document.createElement('button');
+    plus.textContent = '+';
+    plus.addEventListener('click', () => changeQty(item.id, 1));
+
+    const del = document.createElement('button');
+    del.textContent = '×';
+    del.addEventListener('click', () => removeItem(item.id));
+
+    controls.append(minus, plus, del);
+    row.append(left, controls);
+    list.appendChild(row);
+  });
+
+  document.getElementById('cartTotal').textContent = fmt.format(total);
+  document.getElementById('cartCount').textContent = count;
+}
+
+function openCart() {
+  document.getElementById('cartDrawer').classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+}
+
+function closeCart() {
+  document.getElementById('cartDrawer').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+function checkout() {
+  if (state.cart.length === 0) {
+    alert('Tu carrito está vacío.');
+    return;
+  }
+  alert('Demo: aquí se conectará Webpay / Mercado Pago. Este prototipo no procesa pagos reales.');
+}
+
+document.getElementById('search').addEventListener('input', (e) => {
+  state.search = e.target.value;
+  renderProducts();
+});
+
+document.getElementById('cartBtn').addEventListener('click', openCart);
+
+/* =========================================================
+   启动
+   ========================================================= */
+loadCart();
+renderCategories();
+renderProducts();
+renderCart();
+
+(function initAuth() {
+  const savedUser = (localStorage.getItem(AUTH_USER_KEY) || '').toLowerCase();
+  if (savedUser && isValidEmail(savedUser)) {
+    enterStore(savedUser);
+  } else {
+    localStorage.removeItem(AUTH_USER_KEY);
+    showLogin();
+  }
+})();
+</script>
+
+</body>
+</html>
