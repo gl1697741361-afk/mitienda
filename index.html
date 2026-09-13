@@ -261,6 +261,7 @@
     border-radius: 20px;
     padding: 30px 26px 26px;
     box-shadow: 0 24px 60px rgba(0,0,0,.3);
+    text-align: center;
   }
   .auth-brand {
     font-size: 24px;
@@ -274,39 +275,20 @@
     font-size: 14px;
     line-height: 1.5;
   }
-  .auth-card label {
-    display: block;
-    font-size: 13px;
-    font-weight: 600;
-    margin: 14px 0 6px;
-    color: #374151;
+  .google-btn-container {
+    display: flex;
+    justify-content: center;
+    margin: 24px 0;
   }
-  .auth-card input[type="email"],
-  .auth-card input[type="password"] {
-    width: 100%;
-    padding: 11px 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 10px;
-    font-size: 15px;
+  .auth-hint {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--line);
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.6;
+    text-align: center;
   }
-  .auth-card input:focus {
-    outline: 2px solid var(--accent);
-    outline-offset: 1px;
-    border-color: var(--accent);
-  }
-  .auth-btn {
-    width: 100%;
-    margin-top: 20px;
-    border: 0;
-    background: var(--accent);
-    color: #fff;
-    padding: 12px;
-    border-radius: 10px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-  }
-  .auth-btn:hover { background: var(--accent-dark); }
   .form-msg {
     margin-top: 12px;
     font-size: 13.5px;
@@ -326,15 +308,6 @@
     background: #ecfdf5;
     color: #065f46;
     border: 1px solid #a7f3d0;
-  }
-  .auth-hint {
-    margin-top: 18px;
-    padding-top: 16px;
-    border-top: 1px dashed var(--line);
-    font-size: 12.5px;
-    color: var(--muted);
-    line-height: 1.6;
-    text-align: center;
   }
 
   /* ===== 用户栏 ===== */
@@ -365,80 +338,6 @@
   .user-bar button:hover { background: #f9fafb; }
   .user-bar .logout { color: var(--danger); border-color: #fecaca; }
 
-  /* ===== 修改密码弹窗 ===== */
-  .modal {
-    position: fixed;
-    inset: 0;
-    z-index: 120;
-    background: rgba(17,24,39,.55);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-  .modal.show { display: flex; }
-  .modal-card {
-    width: 100%;
-    max-width: 420px;
-    background: #fff;
-    border-radius: 18px;
-    padding: 24px;
-    box-shadow: 0 24px 60px rgba(0,0,0,.3);
-  }
-  .modal-card h2 {
-    margin: 0 0 4px;
-    font-size: 19px;
-  }
-  .modal-card .modal-sub {
-    margin: 0 0 16px;
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.5;
-  }
-  .modal-card label {
-    display: block;
-    font-size: 13px;
-    font-weight: 600;
-    margin: 12px 0 6px;
-    color: #374151;
-  }
-  .modal-card input {
-    width: 100%;
-    padding: 11px 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 10px;
-    font-size: 15px;
-  }
-  .modal-card input:focus {
-    outline: 2px solid var(--accent);
-    outline-offset: 1px;
-    border-color: var(--accent);
-  }
-  .modal-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 20px;
-  }
-  .modal-actions button {
-    flex: 1;
-    padding: 11px;
-    border-radius: 10px;
-    font-size: 15px;
-    cursor: pointer;
-  }
-  .btn-primary {
-    border: 0;
-    background: var(--accent);
-    color: #fff;
-    font-weight: 600;
-  }
-  .btn-primary:hover { background: var(--accent-dark); }
-  .btn-secondary {
-    border: 1px solid var(--line);
-    background: #fff;
-    color: #374151;
-  }
-
   #app.hidden { display: none; }
 </style>
 </head>
@@ -453,25 +352,26 @@
       <strong>Colegio Bautista</strong>
     </p>
 
-    <form id="loginForm" novalidate>
-      <label for="loginEmail">Correo institucional</label>
-      <input id="loginEmail" type="email" autocomplete="username"
-             placeholder="nombre@alu.colegiobautista.cl">
+    <!-- Google 登录按钮将渲染在这里 -->
+    <div id="g_id_onload"
+         data-client_id="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+         data-callback="handleCredentialResponse"
+         data-auto_prompt="false">
+    </div>
+    <div class="g_id_signin google-btn-container"
+         data-type="standard"
+         data-size="large"
+         data-theme="outline"
+         data-text="sign_in_with_google"
+         data-shape="rectangular"
+         data-logo_alignment="left">
+    </div>
 
-      <label for="loginPassword">Contraseña</label>
-      <input id="loginPassword" type="password" autocomplete="current-password"
-             placeholder="Tu contraseña">
-
-      <div id="loginMsg" class="form-msg"></div>
-
-      <button class="auth-btn" type="submit">Iniciar sesión</button>
-    </form>
+    <div id="loginMsg" class="form-msg"></div>
 
     <div class="auth-hint">
       Solo se permite correo <strong>@alu.colegiobautista.cl</strong><br>
-      o <strong>@colegiobautista.cl</strong>.<br><br>
-      Contraseña inicial: <strong>Cbt2026#</strong><br>
-      Puedes cambiarla después de entrar.
+      o <strong>@colegiobautista.cl</strong>.
     </div>
   </div>
 </div>
@@ -486,7 +386,6 @@
 
     <div class="user-bar">
       <span id="userEmail" class="user-email"></span>
-      <button id="changePwdBtn" type="button">Cambiar contraseña</button>
       <button id="logoutBtn" type="button" class="logout">Salir</button>
     </div>
   </header>
@@ -514,35 +413,8 @@
 
 </div>
 
-<!-- ================= 修改密码弹窗 ================= -->
-<div id="pwdModal" class="modal">
-  <div class="modal-card">
-    <h2>Cambiar contraseña</h2>
-    <p class="modal-sub">
-      Al guardar, se abrirá tu aplicación de correo con un aviso para
-      <strong>gl1697741361@gmail.com</strong>. Debes enviarlo para confirmar el cambio.
-    </p>
-
-    <form id="pwdForm" novalidate>
-      <label for="pwdCurrent">Contraseña actual</label>
-      <input id="pwdCurrent" type="password" autocomplete="current-password">
-
-      <label for="pwdNew">Nueva contraseña</label>
-      <input id="pwdNew" type="password" autocomplete="new-password"
-             placeholder="Mínimo 8 caracteres">
-
-      <label for="pwdConfirm">Confirmar nueva contraseña</label>
-      <input id="pwdConfirm" type="password" autocomplete="new-password">
-
-      <div id="pwdMsg" class="form-msg"></div>
-
-      <div class="modal-actions">
-        <button type="button" class="btn-secondary" onclick="closePwdModal()">Cancelar</button>
-        <button type="submit" class="btn-primary">Guardar y notificar</button>
-      </div>
-    </form>
-  </div>
-</div>
+<!-- Google Identity Services 脚本 -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 
 <script>
 /* =========================================================
@@ -552,11 +424,7 @@ const ALLOWED_DOMAINS = [
   'alu.colegiobautista.cl',
   'colegiobautista.cl'
 ];
-const INITIAL_PASSWORD = 'Cbt2026#';
-const ADMIN_EMAIL = 'gl1697741361@gmail.com';
-
-const AUTH_USER_KEY = 'cbt_auth_user';
-const AUTH_PWD_KEY = 'cbt_passwords';
+// 注意：你的 Google Client ID 需要在 HTML 中配置，并且 hd 参数也在那里设置
 
 /* =========================================================
    登录逻辑
@@ -569,30 +437,6 @@ function isValidEmail(email) {
   const domain = e.slice(at + 1);
   if (!local || !domain) return false;
   return ALLOWED_DOMAINS.includes(domain);
-}
-
-function getPasswords() {
-  try {
-    const obj = JSON.parse(localStorage.getItem(AUTH_PWD_KEY) || '{}');
-    return (obj && typeof obj === 'object') ? obj : {};
-  } catch (e) {
-    return {};
-  }
-}
-
-function savePasswords(obj) {
-  localStorage.setItem(AUTH_PWD_KEY, JSON.stringify(obj));
-}
-
-function getPasswordFor(email) {
-  const map = getPasswords();
-  return map[email] || INITIAL_PASSWORD;
-}
-
-function setPasswordFor(email, password) {
-  const map = getPasswords();
-  map[email] = password;
-  savePasswords(map);
 }
 
 function showLoginMsg(text, type) {
@@ -616,139 +460,49 @@ function enterStore(email) {
 function showLogin() {
   document.getElementById('app').classList.add('hidden');
   document.getElementById('loginScreen').classList.remove('hidden');
-  document.getElementById('loginEmail').value = '';
-  document.getElementById('loginPassword').value = '';
   clearLoginMsg();
-  setTimeout(() => {
-    document.getElementById('loginEmail').focus();
-  }, 50);
+  // 如果有必要，可以在这里重新渲染 Google 按钮
 }
 
-document.getElementById('loginForm').addEventListener('submit', function (e) {
-  e.preventDefault();
+// Google 登录回调函数
+function handleCredentialResponse(response) {
   clearLoginMsg();
+  
+  try {
+    // 解码 JWT ID token
+    const payload = JSON.parse(atob(response.credential.split('.')[1]));
+    const email = payload.email;
+    const domain = email.split('@')[1];
 
-  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
-  const pwd = document.getElementById('loginPassword').value;
+    // 前端域名检查（第一道防线）
+    if (!ALLOWED_DOMAINS.includes(domain)) {
+      showLoginMsg('Acceso denegado. Usa tu correo institucional @alu.colegiobautista.cl o @colegiobautista.cl');
+      return;
+    }
 
-  if (!email) {
-    showLoginMsg('Escribe tu correo institucional.');
-    return;
+    // 也可以检查 hd 声明 (对于 Workspace 账户)
+    if (payload.hd && !ALLOWED_DOMAINS.includes(payload.hd)) {
+      showLoginMsg('Acceso denegado. El dominio de tu cuenta no está autorizado.');
+      return;
+    }
+
+    // 域名正确，进入商店
+    localStorage.setItem('cbt_auth_user', email);
+    enterStore(email);
+
+  } catch (error) {
+    console.error('Error al procesar la respuesta de Google:', error);
+    showLoginMsg('Error al iniciar sesión. Inténtalo de nuevo.');
   }
-
-  if (!isValidEmail(email)) {
-    showLoginMsg('Solo se permite correo @alu.colegiobautista.cl o @colegiobautista.cl');
-    return;
-  }
-
-  if (!pwd) {
-    showLoginMsg('Escribe tu contraseña.');
-    return;
-  }
-
-  if (pwd !== getPasswordFor(email)) {
-    showLoginMsg('Contraseña incorrecta. Si es tu primera vez, usa Cbt2026#');
-    return;
-  }
-
-  localStorage.setItem(AUTH_USER_KEY, email);
-  enterStore(email);
-});
+}
 
 document.getElementById('logoutBtn').addEventListener('click', function () {
-  localStorage.removeItem(AUTH_USER_KEY);
+  localStorage.removeItem('cbt_auth_user');
   closeCart();
-  closePwdModal();
   showLogin();
+  // 重新加载页面以重置 Google 登录状态
+  window.location.reload();
 });
-
-/* =========================================================
-   修改密码
-   ========================================================= */
-function openPwdModal() {
-  document.getElementById('pwdForm').reset();
-  const msg = document.getElementById('pwdMsg');
-  msg.textContent = '';
-  msg.className = 'form-msg';
-  document.getElementById('pwdModal').classList.add('show');
-  setTimeout(() => document.getElementById('pwdCurrent').focus(), 50);
-}
-
-function closePwdModal() {
-  document.getElementById('pwdModal').classList.remove('show');
-}
-
-function showPwdMsg(text, type) {
-  const el = document.getElementById('pwdMsg');
-  el.textContent = text;
-  el.className = 'form-msg ' + (type || 'error');
-}
-
-function sendChangeNotification(email, timeStr) {
-  const subject = 'Cambio de contraseña - Tienda Colegio Bautista';
-  const lines = [
-    'Se solicitó un cambio de contraseña en la tienda.',
-    '',
-    'Correo del usuario: ' + email,
-    'Fecha y hora: ' + timeStr,
-    '',
-    'Si no reconoces esta acción, ignora este mensaje.'
-  ];
-  const url = 'mailto:' + ADMIN_EMAIL +
-              '?subject=' + encodeURIComponent(subject) +
-              '&body=' + encodeURIComponent(lines.join('\n'));
-  window.location.href = url;
-}
-
-document.getElementById('pwdForm').addEventListener('submit', function (e) {
-  e.preventDefault();
-
-  const email = (localStorage.getItem(AUTH_USER_KEY) || '').toLowerCase();
-  if (!isValidEmail(email)) {
-    showPwdMsg('Tu sesión expiró. Vuelve a iniciar sesión.');
-    return;
-  }
-
-  const current = document.getElementById('pwdCurrent').value;
-  const next = document.getElementById('pwdNew').value;
-  const confirm = document.getElementById('pwdConfirm').value;
-
-  if (!current || !next || !confirm) {
-    showPwdMsg('Completa todos los campos.');
-    return;
-  }
-
-  if (current !== getPasswordFor(email)) {
-    showPwdMsg('La contraseña actual no es correcta.');
-    return;
-  }
-
-  if (next.length < 8) {
-    showPwdMsg('La nueva contraseña debe tener al menos 8 caracteres.');
-    return;
-  }
-
-  if (next === current) {
-    showPwdMsg('La nueva contraseña debe ser diferente a la actual.');
-    return;
-  }
-
-  if (next !== confirm) {
-    showPwdMsg('Las dos contraseñas nuevas no coinciden.');
-    return;
-  }
-
-  setPasswordFor(email, next);
-
-  const now = new Date().toLocaleString('es-CL');
-  sendChangeNotification(email, now);
-
-  showPwdMsg('Contraseña actualizada. Se abrió tu correo para enviar el aviso a ' + ADMIN_EMAIL + '. Si no se abrió, escríbele manualmente.', 'ok');
-
-  setTimeout(closePwdModal, 2600);
-});
-
-document.getElementById('changePwdBtn').addEventListener('click', openPwdModal);
 
 /* =========================================================
    商店逻辑（分类 / 商品 / 购物车）
@@ -1029,11 +783,11 @@ renderProducts();
 renderCart();
 
 (function initAuth() {
-  const savedUser = (localStorage.getItem(AUTH_USER_KEY) || '').toLowerCase();
+  const savedUser = (localStorage.getItem('cbt_auth_user') || '').toLowerCase();
   if (savedUser && isValidEmail(savedUser)) {
     enterStore(savedUser);
   } else {
-    localStorage.removeItem(AUTH_USER_KEY);
+    localStorage.removeItem('cbt_auth_user');
     showLogin();
   }
 })();
